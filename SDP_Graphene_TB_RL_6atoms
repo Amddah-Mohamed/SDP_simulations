@@ -4,32 +4,20 @@ from ncpol2sdpa import generate_operators, SdpRelaxation, flatten
 from sympy.physics.quantum.dagger import Dagger
 # Parameters
 t = 2.8  # Hopping energy (eV)
-N = 10   # Number of unit cells (small for demonstration)
+#N = 10   # Number of unit cells (small for demonstration)
 
-d = 1  # Å
-b1 = (2*np.pi/(3*d)) * np.array([1, 1/np.sqrt(3)])
-b2 = (2*np.pi/(3*d)) * np.array([1, -1/np.sqrt(3)])
-l=1j
-BZ=[] #Lattice momentum vectors in the first Brillouin Zone
-for p1 in range(N) :
-    for p2 in range(N):
-        BZ+= [(p1/N)*b1 + (p2/N)*b2]
-d1=(d/2)*np.array([1, np.sqrt(3)])
-d2=(d/2)*np.array([1, -np.sqrt(3)])
-d3=d*np.array([1,0])
-D=[d1,d2,d3]
 
 # Create annihilation operators for each sublattice
-a = generate_operators('a', len(BZ))          
-b = generate_operators('b', len(BZ))
-a_dag=generate_operators('a_dag', len(BZ))
-b_dag=generate_operators('b_dag', len(BZ))
+a = generate_operators('a', 3)          
+b = generate_operators('b', 3)
+a_dag=generate_operators('a_dag', 3)
+b_dag=generate_operators('b_dag', 3)
 H = 0
 # Nearest-neighbor hopping (A <-> B within and between unit cells)
-for i in range(len(BZ)):
-    for r in D:
+for i in range(2):
+    for j in range(2):
     # Intra-cell hopping (A_i to B_i)
-        H -= (2*t/(N**2)) * (np.exp(l*(BZ[i]@r))*(a_dag[i] * b[i]) + np.exp(-l*(BZ[i]@r))*b_dag[i] * a[i])
+        H -= (2*t/6) *(a_dag[i]* b[j] + b_dag[j] * a[i])
 constraints={}
 
 constraints ={**nc.fermionic_constraints(a), **nc.fermionic_constraints(b)}#adding fermionic anticommutation relations for each sublattice
