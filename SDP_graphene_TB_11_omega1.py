@@ -29,20 +29,20 @@ H = 0
 for i in range(len(BZ)):
     for r in D:
     # Intra-cell hopping (A_i to B_i)
-        H -= (2*t/(N**2)) * (np.exp(l*(BZ[i]@r))*(a_dag[i] * b[i]) + np.exp(-l*(BZ[i]@r))*b_dag[i] * a[i])
+        H -= (2*t/(N**2)) * (np.exp(l*(BZ[i]@r))*(Dagger(a[i]) * b[i]) + np.exp(-l*(BZ[i]@r))*Dagger(b[i]) * a[i])
 constraints={}
 
 constraints ={**nc.fermionic_constraints(a), **nc.fermionic_constraints(b)}#adding fermionic anticommutation relations for each sublattice
 #constraints = [k - v for k, v in constraints.items()]
-# for ai in a:
-#     for bj in b:
-#         constraints[ai*Dagger(bj)] = -Dagger(bj)*ai
-#         constraints[Dagger(ai)*bj] = -bj*Dagger(ai)
-#         constraints[ai*bj] = -bj*ai
-#         constraints[Dagger(ai) * Dagger(bj)] = - Dagger(bj) * Dagger(ai)   
+for ai in a:
+    for bj in b:
+        constraints[ai*Dagger(bj)] = -Dagger(bj)*ai
+        constraints[Dagger(ai)*bj] = -bj*Dagger(ai)
+        constraints[ai*bj] = -bj*ai
+        constraints[Dagger(ai) * Dagger(bj)] = - Dagger(bj) * Dagger(ai)   
 
 # Flatten operators and initialize SDP
-ops = flatten([a,b,a_dag,b_dag])
+ops = flatten([a,b])
 sdp = SdpRelaxation(ops,parallel=True )
 sdp.get_relaxation(level=2, objective=H, substitutions=constraints)
 # Solve with SDPA solver (recommended)
