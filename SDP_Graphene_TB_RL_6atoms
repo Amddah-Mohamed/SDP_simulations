@@ -10,27 +10,27 @@ t = 2.8  # Hopping energy (eV)
 # Create annihilation operators for each sublattice
 a = generate_operators('a', 3)          
 b = generate_operators('b', 3)
-a_dag=generate_operators('a_dag', 3)
-b_dag=generate_operators('b_dag', 3)
+# a_dag=generate_operators('a_dag', 3)
+# b_dag=generate_operators('b_dag', 3)
 H = 0
 # Nearest-neighbor hopping (A <-> B within and between unit cells)
 for i in range(2):
     for j in range(2):
     # Intra-cell hopping (A_i to B_i)
-        H -= (2*t/6) *(a_dag[i]* b[j] + b_dag[j] * a[i])
+        H -= (2*t/6) *(Dagger(a[i])* b[j] + Dagger(b[j]) * a[i])
 constraints={}
 
 constraints ={**nc.fermionic_constraints(a), **nc.fermionic_constraints(b)}#adding fermionic anticommutation relations for each sublattice
 #constraints = [k - v for k, v in constraints.items()]
-# for ai in a:
-#     for bj in b:
-#         constraints[ai*Dagger(bj)] = -Dagger(bj)*ai
-#         constraints[Dagger(ai)*bj] = -bj*Dagger(ai)
-#         constraints[ai*bj] = -bj*ai
-#         constraints[Dagger(ai) * Dagger(bj)] = - Dagger(bj) * Dagger(ai)   
+for ai in a:
+    for bj in b:
+        constraints[ai*Dagger(bj)] = -Dagger(bj)*ai
+        constraints[Dagger(ai)*bj] = -bj*Dagger(ai)
+        constraints[ai*bj] = -bj*ai
+        constraints[Dagger(ai) * Dagger(bj)] = - Dagger(bj) * Dagger(ai)   
 
 # Flatten operators and initialize SDP
-ops = flatten([a,b,a_dag,b_dag])
+ops = flatten([a,b])
 sdp = SdpRelaxation(ops,parallel=True )
 sdp.get_relaxation(level=2, objective=H, substitutions=constraints)
 # Solve with SDPA solver (recommended)
